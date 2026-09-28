@@ -67,10 +67,60 @@ with st.sidebar:
         st.write(f"{c['records_screened']} records, {c['undecided']} to screen")
         st.progress(0 if not c["records_screened"] else 1 - c["undecided"] / c["records_screened"])
 
+# Settings (available even before the first project exists)
+
+
+def render_settings():
+    st.subheader("Settings")
+    st.caption(f"Your data and settings are stored in {config.data_dir()}. They never leave this computer "
+               "except when searching PubMed or sending to Zotero.")
+    with st.form("settings"):
+        st.markdown("**PubMed (NCBI)**")
+        email = st.text_input("Your email (NCBI asks for this)", settings["ncbi_email"])
+        ncbi_key = st.text_input("NCBI API key (optional, makes searches faster)", settings["ncbi_api_key"],
+                                 type="password")
+        st.markdown("**Zotero**")
+        zid = st.text_input("Zotero user ID (a number)", settings["zotero_user_id"])
+        zkey = st.text_input("Zotero API key", settings["zotero_api_key"], type="password")
+        st.markdown("**Anthropic (for AI screening, coming in the next update)**")
+        akey = st.text_input("Anthropic API key", settings["anthropic_api_key"], type="password")
+        if st.form_submit_button("Save settings", type="primary"):
+            config.save_settings({"ncbi_email": email, "ncbi_api_key": ncbi_key, "zotero_user_id": zid,
+                                  "zotero_api_key": zkey, "anthropic_api_key": akey})
+            st.session_state.settings_message = "Settings saved."
+            st.rerun()
+
+    if st.session_state.get("settings_message"):
+        st.success(st.session_state.pop("settings_message"))
+
+    t1, t2 = st.columns(2)
+    if t1.button("Test PubMed"):
+        try:
+            st.success(pubmed_client().check())
+        except PubMedError as exc:
+            st.error(str(exc))
+    if t2.button("Test Zotero"):
+        try:
+            st.success(Zotero(settings["zotero_user_id"], settings["zotero_api_key"]).check())
+        except (ZoteroError, Exception) as exc:
+            st.error(str(exc))
+
+    with st.expander("Where do I get these?"):
+        st.write("NCBI API key: sign in at ncbi.nlm.nih.gov, open Account settings, and create an API key.")
+        st.write("Zotero: sign in at zotero.org/settings/keys. Your user ID is shown at the top of that page. "
+                 "Click 'Create new private key', tick 'Allow library access' and 'Allow write access', then save.")
+        st.write("Anthropic: create a key at platform.claude.com/settings/keys. Paste it here only, never into a chat.")
+
+
 if not current:
-    st.header("Welcome to LitAssist")
-    st.write("Create your first project in the sidebar. Choose the PhD Objective 1 template to start with a draft "
-             "scoping review protocol and PubMed search strategy.")
+    tab_start, tab_settings = st.tabs(["Getting started", "Settings"])
+    with tab_start:
+        st.header("Welcome to LitAssist")
+        st.write("1. Open the Settings tab above, enter your email address, save, and click Test PubMed.")
+        st.write("2. Create your first project with New project in the sidebar on the left. Choose the PhD "
+                 "Objective 1 template to start with a draft scoping review protocol and PubMed search strategy.")
+    with tab_settings:
+        render_settings()
     st.stop()
 
 pid = current["id"]
@@ -316,43 +366,5 @@ with tab_export:
         except ZoteroError as exc:
             st.error(str(exc))
 
-
-# Settings
-
 with tab_settings:
-    st.subheader("Settings")
-    st.caption(f"Your data and settings are stored in {config.data_dir()}. They never leave this computer "
-               "except when searching PubMed or sending to Zotero.")
-    with st.form("settings"):
-        st.markdown("**PubMed (NCBI)**")
-        email = st.text_input("Your email (NCBI asks for this)", settings["ncbi_email"])
-        ncbi_key = st.text_input("NCBI API key (optional, makes searches faster)", settings["ncbi_api_key"],
-                                 type="password")
-        st.markdown("**Zotero**")
-        zid = st.text_input("Zotero user ID (a number)", settings["zotero_user_id"])
-        zkey = st.text_input("Zotero API key", settings["zotero_api_key"], type="password")
-        st.markdown("**Anthropic (for AI screening, coming in the next update)**")
-        akey = st.text_input("Anthropic API key", settings["anthropic_api_key"], type="password")
-        if st.form_submit_button("Save settings", type="primary"):
-            config.save_settings({"ncbi_email": email, "ncbi_api_key": ncbi_key, "zotero_user_id": zid,
-                                  "zotero_api_key": zkey, "anthropic_api_key": akey})
-            st.success("Settings saved.")
-            st.rerun()
-
-    t1, t2 = st.columns(2)
-    if t1.button("Test PubMed"):
-        try:
-            st.success(pubmed_client().check())
-        except PubMedError as exc:
-            st.error(str(exc))
-    if t2.button("Test Zotero"):
-        try:
-            st.success(Zotero(settings["zotero_user_id"], settings["zotero_api_key"]).check())
-        except (ZoteroError, Exception) as exc:
-            st.error(str(exc))
-
-    with st.expander("Where do I get these?"):
-        st.write("NCBI API key: sign in at ncbi.nlm.nih.gov, open Account settings, and create an API key.")
-        st.write("Zotero: sign in at zotero.org/settings/keys. Your user ID is shown at the top of that page. "
-                 "Click 'Create new private key', tick 'Allow library access' and 'Allow write access', then save.")
-        st.write("Anthropic: create a key at platform.claude.com/settings/keys. Paste it here only, never into a chat.")
+    render_settings()
