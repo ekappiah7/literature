@@ -115,6 +115,15 @@ def records_frame(records: list[dict]) -> pd.DataFrame:
             "Decision": r["ta_decision"],
             "Reason": r["ta_reason"],
             "Decided at": r["ta_decided_at"],
+            "AI suggestion": r.get("ai_decision", ""),
+            "AI reason": r.get("ai_reason", ""),
+            "AI criterion": r.get("ai_criterion", ""),
+            "AI confidence": r.get("ai_confidence", ""),
+            "AI model": r.get("ai_model", ""),
+            "Second screener": r.get("second_decision", ""),
+            "Full text decision": r.get("ft_decision", ""),
+            "Full text reason": r.get("ft_reason", ""),
+            "Full text file": "yes" if r.get("pdf_path") else "",
             "Source": r["source"],
             "Abstract": r["abstract"],
             "MeSH": "; ".join(r["mesh"]),
@@ -122,10 +131,26 @@ def records_frame(records: list[dict]) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def to_excel(project: dict, records: list[dict], searches: list[dict], counts: dict) -> bytes:
+def charting_frame(records: list[dict], fields: list[str]) -> pd.DataFrame:
+    rows = []
+    for r in records:
+        row = {"ID": r["id"], "Study": f"{r['authors'][0]['last'] if r['authors'] else ''} {r['year']}".strip(),
+               "Title": r["title"], "DOI": r["doi"], "PMID": r["pmid"], "Charting status": r.get("chart_status", "")}
+        chart = r.get("chart") or {}
+        for f in fields:
+            item = chart.get(f, {})
+            row[f] = item.get("value", "") if isinstance(item, dict) else str(item)
+        rows.append(row)
+    return pd.DataFrame(rows)
+
+
+def to_excel(project: dict, records: list[dict], searches: list[dict], counts: dict,
+             charted: list[dict] | None = None, chart_fields: list[str] | None = None) -> bytes:
     buf = io.BytesIO()
     with pd.ExcelWriter(buf, engine="openpyxl") as xl:
         records_frame(records).to_excel(xl, sheet_name="Records", index=False)
+        if charted:
+            charting_frame(charted, chart_fields or []).to_excel(xl, sheet_name="Charting", index=False)
         log = pd.DataFrame(searches)
         if not log.empty:
             log = log[["run_at", "source", "query", "filters", "hits", "retrieved", "new_records", "duplicates", "note"]]
@@ -138,8 +163,12 @@ def to_excel(project: dict, records: list[dict], searches: list[dict], counts: d
                 ("Records screened (title and abstract)", counts["records_screened"]),
                 ("Records excluded", counts["excluded"]),
                 ("Records marked maybe", counts["maybe"]),
-                ("Records included for full text", counts["included"]),
                 ("Records not yet screened", counts["undecided"]),
+                ("Full texts sought", counts.get("ft_sought", "")),
+                ("Full texts not retrieved", counts.get("ft_not_retrieved", "")),
+                ("Full texts assessed", counts.get("ft_assessed", "")),
+                ("Full texts excluded", counts.get("ft_excluded", "")),
+                ("Sources included in the review", counts.get("ft_included", "")),
             ],
             columns=["PRISMA-ScR stage", "Count"],
         )
@@ -149,6 +178,9 @@ def to_excel(project: dict, records: list[dict], searches: list[dict], counts: d
              ("name", "question", "review_type", "population", "concept", "context", "inclusion", "exclusion", "strategy")],
             columns=["Field", "Value"],
         ).to_excel(xl, sheet_name="Protocol", index=False)
+        if counts.get("ft_excluded_reasons"):
+            pd.DataFrame(list(counts["ft_excluded_reasons"].items()), columns=["Full text exclusion reason", "Count"]) \
+                .to_excel(xl, sheet_name="Full text exclusions", index=False)
         for ws in xl.book.worksheets:
             for col in ws.columns:
                 width = max(len(str(c.value or "")) for c in col[:50])

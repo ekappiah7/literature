@@ -59,8 +59,9 @@ def test_dedup_and_decisions(conn, records):
     with pytest.raises(ValueError):
         db.set_decision(conn, rec_ids[1], "perhaps")
     c = db.counts(conn, pid)
-    assert c == {"records_identified": 4, "duplicates_removed": 2, "records_screened": 2,
-                 "included": 1, "excluded": 1, "maybe": 0, "undecided": 0}
+    expected = {"records_identified": 4, "duplicates_removed": 2, "records_screened": 2,
+                "included": 1, "excluded": 1, "maybe": 0, "undecided": 0, "ft_sought": 1}
+    assert {k: c[k] for k in expected} == expected
     assert len(db.list_records(conn, pid, "include")) == 1
     log = conn.execute("SELECT COUNT(*) FROM decision_log").fetchone()[0]
     assert log == 2

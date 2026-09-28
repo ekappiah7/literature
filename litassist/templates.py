@@ -1,5 +1,8 @@
 """Starter projects. These are drafts to edit, not final strategies."""
 
+from litassist.charting import OBJECTIVE_1_FIELDS
+from litassist.sources import EPMC_OBJ1
+
 SSA_COUNTRIES = [
     "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi", "Cameroon", "Cape Verde", "Cabo Verde",
     "Central African Republic", "Chad", "Comoros", "Congo", "Cote d'Ivoire", "Ivory Coast", "Djibouti",
@@ -51,5 +54,15 @@ TEMPLATES = {
             "and commentaries (kept for reference searching). Studies of African patients treated outside Africa."
         ),
         "strategy": OBJECTIVE_1_STRATEGY,
+        "chart_fields": OBJECTIVE_1_FIELDS,
+        "exclusion_reasons": "\n".join([
+            "Not IVF or ICSI", "Not sub-Saharan Africa", "No outcome data", "Review, editorial or commentary",
+            "Animal or laboratory study", "Patients treated outside Africa", "Duplicate", "Other",
+        ]),
     },
+}
+
+# Starting strings for the other databases, keyed by template name.
+OTHER_STRATEGIES = {
+    "PhD Obj 1: ART outcomes in SSA (scoping review)": {"Europe PMC": EPMC_OBJ1},
 }
