@@ -1,0 +1,55 @@
+<?xml version="1.0" ?>
+<PubmedArticleSet>
+<PubmedArticle>
+  <MedlineCitation>
+    <PMID Version="1">11111111</PMID>
+    <Article>
+      <Journal>
+        <JournalIssue><Volume>12</Volume><Issue>3</Issue><PubDate><Year>2021</Year><Month>Mar</Month></PubDate></JournalIssue>
+        <Title>African Journal of Reproductive Health</Title>
+        <ISOAbbreviation>Afr J Reprod Health</ISOAbbreviation>
+      </Journal>
+      <ArticleTitle>Live birth after <i>IVF</i> in Kumasi, Ghana: a cohort study.</ArticleTitle>
+      <Pagination><MedlinePgn>101-110</MedlinePgn></Pagination>
+      <Abstract>
+        <AbstractText Label="BACKGROUND">Few data exist.</AbstractText>
+        <AbstractText Label="RESULTS">Live birth rate was 30%.</AbstractText>
+      </Abstract>
+      <AuthorList>
+        <Author><LastName>Mensah</LastName><ForeName>Kofi</ForeName><Initials>K</Initials></Author>
+        <Author><LastName>Owusu</LastName><ForeName>Ama</ForeName><Initials>A</Initials></Author>
+      </AuthorList>
+      <Language>eng</Language>
+      <PublicationTypeList><PublicationType>Journal Article</PublicationType></PublicationTypeList>
+    </Article>
+    <MeshHeadingList>
+      <MeshHeading><DescriptorName>Fertilization in Vitro</DescriptorName></MeshHeading>
+      <MeshHeading><DescriptorName>Ghana</DescriptorName></MeshHeading>
+    </MeshHeadingList>
+  </MedlineCitation>
+  <PubmedData>
+    <ArticleIdList>
+      <ArticleId IdType="pubmed">11111111</ArticleId>
+      <ArticleId IdType="doi">10.1000/example.1</ArticleId>
+      <ArticleId IdType="pmc">PMC1234567</ArticleId>
+    </ArticleIdList>
+  </PubmedData>
+</PubmedArticle>
+<PubmedArticle>
+  <MedlineCitation>
+    <PMID Version="1">22222222</PMID>
+    <Article>
+      <Journal>
+        <JournalIssue><PubDate><MedlineDate>2019 Jan-Feb</MedlineDate></PubDate></JournalIssue>
+        <Title>Ghana Medical Journal</Title>
+      </Journal>
+      <ArticleTitle>ICSI outcomes in West Africa.</ArticleTitle>
+      <ELocationID EIdType="doi">10.1000/example.2</ELocationID>
+      <AuthorList>
+        <Author><CollectiveName>Ghana ART Study Group</CollectiveName></Author>
+      </AuthorList>
+    </Article>
+  </MedlineCitation>
+  <PubmedData><ArticleIdList><ArticleId IdType="pubmed">22222222</ArticleId></ArticleIdList></PubmedData>
+</PubmedArticle>
+</PubmedArticleSet>
